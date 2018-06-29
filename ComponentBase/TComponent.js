@@ -7,17 +7,21 @@
         this.Initialized = null;
         this.Children = [];
         this.Parent = null;
+        this.Root = null;
         if (owner) {
 
             this.Owner = owner;
             this.Owner.Children.push(this);
-            this.ComponentTreeSize++;
+            this.Root = this.Owner.Root;
+            this.Root.ComponentTreeSize++;
+        }
+        else {
+            this.Root = this;
         }
         if (parent)
             this.Parent = parent;
     }
     Initialize() {
-        this.Engine.Traceout("Initialize " + this.Classname);
         for (let i = 0; i < this.Children.length; i++) {            
             this.Children[i].Initialize();
         }
