@@ -3,9 +3,7 @@
         this.Classname = null;
         this.Owner = null;
         this.Engine = engine;
-        this.ThisIsPublic = null;
         this.Initialized = null;
-        var thisIstPrivate = null;
         this.Children = [];
         this.Parent = null;
         if (owner) {
