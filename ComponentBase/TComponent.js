@@ -1,22 +1,4 @@
-﻿class TMessageObject {
-    constructor() {
-        this.Sender = null;
-        this.Receiver = null;
-        this.Msg = null;
-        this.MessageType = null;
-    }
-}
-
-class TEngine {
-    constructor() {
-
-    }
-    TraceOut(szString) {
-        console.log(szString);
-    }
-}
-
-class TComponent {
+﻿class TComponent {
     constructor(owner, parent, engine) {
         this.Classname = null;
         this.Owner = null;
@@ -49,28 +31,5 @@ class TComponent {
                     this.Children[i].SendMessage(msg);
             }
         }
-    }
-}
-
-class TestComponent extends TComponent {
-    constructor(owner, parent, engine) {
-        super(owner, parent, engine);
-        this.Classname = "TestComponent";
-    }
-    Initialize() {
-        super.Initialize();
-    }
-}
-
-class Test {
-    constructor() {
-        var engine = new TEngine();
-        var t = new TestComponent(null, null, engine);
-        var t2 = new TestComponent(t, null, engine);
-        t.Initialized = this.blah();
-        t.Initialize();
-    }
-    blah() {
-        alert("Hallo Welt");
     }
 }
