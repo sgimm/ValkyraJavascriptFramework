@@ -1,6 +1,4 @@
-﻿//Test//
-class t {}
-class TComponent {
+﻿class TComponent {
     constructor(owner, parent, engine) {
         this.Classname = null;
         this.Owner = null;
