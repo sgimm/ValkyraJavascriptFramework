@@ -1,5 +1,6 @@
-﻿class StaticMesh {
+﻿class StaticMesh extends Actor {
     constructor() {
+        super.Actor();
         this.VertexBuffer = [];
         this.TextureBuffer = [];
         this.ColorBuffer = [];
