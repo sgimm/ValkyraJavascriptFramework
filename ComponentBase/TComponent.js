@@ -1,5 +1,6 @@
 ﻿class TComponent {
     constructor(owner, parent, engine) {
+        this.ComponentTreeSize = 1;
         this.Classname = null;
         this.Owner = null;
         this.Engine = engine;
@@ -10,6 +11,7 @@
 
             this.Owner = owner;
             this.Owner.Children.push(this);
+            this.ComponentTreeSize++;
         }
         if (parent)
             this.Parent = parent;
