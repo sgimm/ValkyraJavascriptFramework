@@ -7,97 +7,91 @@
         this.IsAlterColorEnbaled = false;
         this.ItemSource = null;
         this.SelectedRow = null;
-        var styleRowNormal = null;
-        var styleRowAlter = null;
-        var styleRowHover = null;
-        var styleRowHeader = null;
-        var lastRow = null;
-        var actualRow = null;
-        var headers = [];
+        this._styleRowNormal = null;
+        this._styleRowAlter = null;
+        this._styleRowHover = null;
+        this._styleRowHeader = null;
+        this._lastRow = null;
+        this._actualRow = null;
+        this._headers = [];
         this.xmlViewObject = null;
         var viewXml = viewXml;
+        this.GridContainer = null;
+        this.ItemSelected = (function (sender, eventArgs) {
+            if (this.SelectionChanged)
+                this.SelectionChanged(sender, EventArgs);
+        }).bind(this);
 
         if (parent)
             this.Parent = parent;
+
+        this.SetItemSource = function (itemSource) {
+            this.ItemSource = itemSource;
+            this.AddHeader();
+            for (var i = 0; i < this.ItemSource.length; i++) {
+                var gr = new GridRow(this.GridContainer, this);
+                if (this.IsAlterColorEnbaled && i % 2 == 0)
+                    gr.IsAlteredRow = true;
+                gr.Index = i;
+                gr.SelectionChanged = this.SelectionChanged;
+                gr.OnMouseOver = this.OnHit;
+                gr.StyleRowNormal = this._styleRowNormal;
+                gr.StyleRowHover = this._styleRowHover;
+                gr.StyleRowAlter = this._styleRowAlter;
+                gr.Data = this.ItemSource[i];
+                gr.Name = "row_" + i;
+                gr.Initialize();
+                gr.xmlViewObject = this.xmlViewObject;
+                gr.AddRow();
+            }
+        }
+
+        this.SetRowColor = function (foreGround, backGround) {
+            this._styleRowNormal = "fontcolor:" + foreGround + "; " + "background:" + backGround + ";";
+        };
+        this.SetAlterRowColor = function (foreGround, backGround) {
+            this._styleRowAlter = "fontcolor:" + foreGround + "; " + "background:" + backGround + ";";
+        };
+        this.SetHoverColor = function (foreGround, backGround) {
+            this._styleRowHover = "fontcolor:" + foreGround + "; " + "background:" + backGround + ";";
+        };
+        this.SetHeaderColor = function (foreGround, backGround) {
+            this._styleRowHeader = "fontcolor:" + foreGround + "; " + "background:" + backGround + ";";
+        }
     }
 
     Initialize() {
-        if (window.DOMParser) {
-            this.xmlViewObject = (new DOMParser()).parseFromString(this.xmlViewObject, "text/xml");
-        }
-        else if (window.ActiveXObject) {
-            this.xmlViewObject = new ActiveXObject('Microsoft.XMLDOM');
-            this.xmlViewObject.async = false;
-            if (!xmlViewObject.loadXML(this.xmlViewObject)) {
-                throw this.xmlViewObject.parseError.reason + " " + xmlViewObject.parseError.srcText;
+        this.GridContainer = document.createElement("Div");
+        this.GridContainer.setAttribute("id", "GridContainer");
+        this.Parent.appendChild(this.GridContainer);
+        if (this.xmlViewObject) {
+            if (window.DOMParser) {
+                this.xmlViewObject = (new DOMParser()).parseFromString(this.xmlViewObject, "text/xml");
+            }
+            else {
+                throw "cannot parse xml string!";
+            }
+            var _x = this.xmlViewObject.getElementsByTagName("Column");
+            for (var i = 0; i < _x.length; i++) {
+                headers.push(_x[i].childNodes[1].innerHTML);
             }
         }
-        else {
-            throw "cannot parse xml string!";
-        }
-        var _x = this.xmlViewObject.getElementsByTagName("Column");
-        for (var i = 0; i < _x.length; i++) {
-            headers.push(_x[i].childNodes[1].innerHTML);
-        }
     }
-    SetItemSource(itemSource) {
-        this.ItemSource = itemSource;
-        this.AddHeader();
-        for (var i = 0; i < this.ItemSource.length; i++) {
-            var gr = new GridRow(this.Parent, this);
-            if (this.IsAlterColorEnbaled && i % 2 == 0)
-                gr.IsAlteredRow = true;
-            gr.Index = i;
-            gr.OnMouseOver = this.OnHit;
-            gr.StyleRowNormal = styleRowNormal;
-            gr.StyleRowHover = styleRowHover;
-            gr.StyleRowAlter = styleRowAlter;
-            gr.Data = this.ItemSource[i];
-            gr.Name = "row_" + i;
-            gr.Initialize();
-            gr.xmlViewObject = this.xmlViewObject;
-            gr.AddRow();
-        }
-    }
-    SetRowColor(foreGround, backGround) {
-        styleRowNormal = "fontcolor:" + foreGround + "; " + "background:" + backGround + ";";
-    };
-    SetAlterRowColor(foreGround, backGround) {
-        styleRowAlter = "fontcolor:" + foreGround + "; " + "background:" + backGround + ";";
-    };
-    SetHoverColor(foreGround, backGround) {
-        styleRowHover = "fontcolor:" + foreGround + "; " + "background:" + backGround + ";";
-    };
-    SetHeaderColor (foreGround, backGround) {
-        styleRowHeader = "fontcolor:" + foreGround + "; " + "background:" + backGround + ";";
-    }
-    HitTest(e) {
-        for (var i = 0; i < this.Children.length; i++) {
-            if (typeof (this.Children[i]["HitTest"]) === "function")
-                this.Children[i]["HitTest"](e);
-        }
-    };
-    OnHit(row) {
-        lastRow = actualRow;
-        actualRow = row;
-        if (lastRow != actualRow) {
-            if (lastRow)
-                lastRow.ToggleHover();
-            if (actualRow)
-                actualRow.ToggleHover();
-        }
-    };
 
-    OnDblClick = function () {
-        return actualRow;
-    };
-    AddHeader = function () {
-        var gr = new GridRow(this.Parent, this);
-        gr.OnMouseOver = this.OnHit;
+    AddHeader() {
+        if (!this.xmlViewObject) {
+            if (this.ItemSource.length > 0) {
+                for (var x in this.ItemSource[0]) {
+                    this._headers.push(x);
+                }
+            }
+        }
+        var gr = new GridRow(this.GridContainer, this);
+        //gr.OnMouseOver = this.OnHit;
         gr.IsHeaderRow = true;
-        if (styleRowHeader)
-            gr.StyleRowHeader = styleRowHeader;
-        gr.Data = headers;
+        if (this._styleRowHeader)
+            gr.StyleRowHeader = this._styleRowHeader;
+        gr.Data = this._headers;
         gr.Name = "header";
         gr.Initialize();
         gr.xmlViewObject = this.xmlViewObject;
@@ -124,12 +118,38 @@ class GridRow {
         this.IsHeaderRow = false;
         this.xmlViewObject = null;
         var isHover = false;
+        this.SelectedItem = null;
+        this.SelectionChanged = null;
+        this.SelectRow = (function () {
+            this.SelectedItem = this.Data;
+            if (this.SelectionChanged)
+                this.SelectionChanged(this, this.SelectedItem);
+        }).bind(this);
+        this.ToggleHover = (function () {
+            if (this.StyleRowHover != null) {
+                isHover = !isHover;
+                if (isHover)
+                    this.RowContainer.setAttribute("style", this.StyleRowHover + "display: flex;");
+                else if (this.IsAlteredRow)
+                    this.RowContainer.setAttribute("style", this.StyleRowAlter + "display: flex;");
+                else {
+                    if (!this.StyleRowNormal)
+                        this.StyleRowNormal = "";
+                    this.RowContainer.setAttribute("style", this.StyleRowNormal + "display: flex;");
+                }
+            }
+        }).bind(this);
+
+
 
         if (this.Owner)
             this.Owner.Children.push(this);
     }
     Initialize() {
         this.RowContainer = document.createElement("div");
+        this.RowContainer.addEventListener("click", this.SelectRow);
+        this.RowContainer.addEventListener("mouseenter", this.ToggleHover);
+        this.RowContainer.addEventListener("mouseleave", this.ToggleHover);
         var _tempStyle = null;
         if (!this.IsHeaderRow) {
             if (this.IsAlteredRow)
@@ -180,32 +200,7 @@ class GridRow {
         }
     }
 
-    ToggleHover () {
-        if (this.StyleRowHover != null) {
-            isHover = !isHover;
-            if (isHover)
-                this.RowContainer.setAttribute("style", this.StyleRowHover + "display: flex;");
-            else if (this.IsAlteredRow)
-                this.RowContainer.setAttribute("style", this.StyleRowAlter + "display: flex;");
-            else
-                this.RowContainer.setAttribute("style", this.StyleRowNormal + "display: flex;");
-        }
-    };
 
-    HitTest(e) {
-        for (var i = 0; i < this.CellArray.length; i++) {
-            if (typeof (this.CellArray[i]["HitTest"]) == "function") {
-                if (this.CellArray[i]["HitTest"](e) == true) {
-                    this.OnHit(this.CellArray[i]);
-                }
-            }
-        }
-    };
-
-    OnHit = function (cell) {
-        if (this.OnMouseOver)
-            this.OnMouseOver(cell.Owner);
-    };
 }
 class GridCell {
     constructor(parent, owner, cellData) {
@@ -217,11 +212,13 @@ class GridCell {
         this.Width = 0;
     }
     Initialize() {
+        if (this.Width == 0)
+            this.Width = 100;
         this.CellContainer = document.createElement("div");
         this.CellContainer.setAttribute("style", "float:left;Width:" + this.Width + "px;");
     };
 
-    AddCell = function () {
+    AddCell() {
         this.CellContainer.innerHTML = this.Data;
         this.Parent.appendChild(this.CellContainer);
     };
