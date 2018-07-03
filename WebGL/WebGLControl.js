@@ -14,9 +14,11 @@ class WebGLCrontrol {
         this.ShaderProg;
         this.mvMatrix = null;
         this.pMatrix = null;
+        this._renderTree = null;
     }
 
     Initialize() {
+        this._renderTree = new RenderTree();
         this.mvMatrix = mat4.create();
         this.pMatrix = mat4.create();
         this.CanvasElement = document.createElement("canvas");        
@@ -95,8 +97,18 @@ class WebGLCrontrol {
 
     Render() {
 
+
         this.GLContext.viewport(0, 0, this.GLContext.viewportWidth, this.GLContext.viewportHeight);
         this.GLContext.clear(this.GLContext.COLOR_BUFFER_BIT | this.GLContext.DEPTH_BUFFER_BIT);
+
+
+        for (let i = 0; i < this._renderTree.lenght; i++) {
+            if (typeof (this._renderTree[i]["Render"]) == "function") {
+                this._renderTree[i].Render();
+            }
+        }
+
+
 
         mat4.perspective(45, this.GLContext.viewportWidth / this.GLContext.viewportHeight, 0.1, 100.0, this.pMatrix);
 

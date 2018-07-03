@@ -9,21 +9,19 @@
         this.Parent = null;
         this.Root = null;
         if (owner) {
-
             this.Owner = owner;
             this.Owner.Children.push(this);
             this.Root = this.Owner.Root;
             this.Root.ComponentTreeSize++;
         }
-        else {
-            this.Root = this;
-        }
+        else this.Root = this;
         if (parent)
             this.Parent = parent;
     }
     Initialize() {
-        for (let i = 0; i < this.Children.length; i++) {            
-            this.Children[i].Initialize();
+        for (let i = 0; i < this.Children.length; i++) {
+            if (typeof (this.Children[i]["Initialize"]) == "function")
+                this.Children[i].Initialize();
         }
         if (this.Initialized)
             this.Initialized();
@@ -34,6 +32,14 @@
                 if (typeof (this.Children[i]["SendMessage"]) == "function")
                     this.Children[i].SendMessage(msg);
             }
+        }
+    }
+    Destroy() {
+        for (let i = 0; i < this.Children.length; i++) {
+            if (typeof (this.Children[i]["Destroy"]) == "function")
+                this.Children[i].Destroy();
+            this.Children[i] = null;
+            this.ComponentTreeSize--;
         }
     }
 }

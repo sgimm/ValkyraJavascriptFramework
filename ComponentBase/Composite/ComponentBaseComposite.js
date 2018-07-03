@@ -9,21 +9,19 @@
         this.Parent = null;
         this.Root = null;
         if (owner) {
-
             this.Owner = owner;
             this.Owner.Children.push(this);
             this.Root = this.Owner.Root;
             this.Root.ComponentTreeSize++;
         }
-        else {
-            this.Root = this;
-        }
+        else this.Root = this;
         if (parent)
             this.Parent = parent;
     }
     Initialize() {
         for (let i = 0; i < this.Children.length; i++) {
-            this.Children[i].Initialize();
+            if (typeof (this.Children[i]["Initialize"]) == "function")
+                this.Children[i].Initialize();
         }
         if (this.Initialized)
             this.Initialized();
@@ -36,11 +34,10 @@
             }
         }
     }
+
 }
 class TEngine {
-    constructor() {
-
-    }
+    constructor() {}
     TraceOut(szString) {
         console.log(szString);
     }
